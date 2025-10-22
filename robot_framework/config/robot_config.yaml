@@ -1,0 +1,358 @@
+# 双臂轮式机器人配置文件
+# Dual-Arm Wheeled Robot Configuration
+
+# 机器人基本信息
+robot_info:
+  manufacturer: "RoboticsLab"
+  model: "DualArmWheeled-v1.0"
+  serial_number: "DAW-001"
+  version: "1.0.0"
+
+# 硬件配置
+hardware:
+  # 左机械臂配置
+  left_arm:
+    driver_id: "left_arm_driver"
+    dof: 7
+    joint_names: ["left_shoulder_pan", "left_shoulder_lift", "left_elbow", 
+                  "left_wrist_1", "left_wrist_2", "left_wrist_3", "left_wrist_rotate"]
+    joint_limits:
+      position: [[-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14], 
+                 [-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14]]
+      velocity: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
+      effort: [100, 100, 80, 50, 50, 30, 30]
+    home_position: [0.0, -1.57, 0.0, -1.57, 0.0, 0.0, 0.0]
+    connection:
+      type: "ethernet"
+      address: "192.168.1.100"
+      port: 8080
+
+  # 右机械臂配置
+  right_arm:
+    driver_id: "right_arm_driver"
+    dof: 7
+    joint_names: ["right_shoulder_pan", "right_shoulder_lift", "right_elbow",
+                  "right_wrist_1", "right_wrist_2", "right_wrist_3", "right_wrist_rotate"]
+    joint_limits:
+      position: [[-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14],
+                 [-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14]]
+      velocity: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
+      effort: [100, 100, 80, 50, 50, 30, 30]
+    home_position: [0.0, -1.57, 0.0, -1.57, 0.0, 0.0, 0.0]
+    connection:
+      type: "ethernet"
+      address: "192.168.1.101"
+      port: 8080
+
+  # 左夹爪配置
+  left_gripper:
+    driver_id: "left_gripper_driver"
+    type: "parallel_gripper"
+    max_opening: 0.08  # 8cm
+    max_force: 100.0   # N
+    connection:
+      type: "can"
+      can_id: 0x10
+
+  # 右夹爪配置
+  right_gripper:
+    driver_id: "right_gripper_driver"
+    type: "parallel_gripper"
+    max_opening: 0.08  # 8cm
+    max_force: 100.0   # N
+    connection:
+      type: "can"
+      can_id: 0x11
+
+  # 左灵巧手配置（可选）
+  left_dexterous_hand:
+    driver_id: "left_hand_driver"
+    type: "five_finger_hand"
+    fingers: 5
+    dof_per_finger: 3
+    connection:
+      type: "ethernet"
+      address: "192.168.1.110"
+      port: 9090
+
+  # 右灵巧手配置（可选）
+  right_dexterous_hand:
+    driver_id: "right_hand_driver"
+    type: "five_finger_hand"
+    fingers: 5
+    dof_per_finger: 3
+    connection:
+      type: "ethernet"
+      address: "192.168.1.111"
+      port: 9090
+
+  # 底盘配置
+  chassis:
+    driver_id: "chassis_driver"
+    type: "differential_drive"
+    wheel_radius: 0.1  # m
+    wheel_base: 0.5    # m
+    max_linear_velocity: 1.0   # m/s
+    max_angular_velocity: 1.0  # rad/s
+    connection:
+      type: "can"
+      can_id: 0x20
+
+  # 相机配置
+  cameras:
+    - camera_id: "head_camera"
+      driver_id: "head_camera_driver"
+      type: "rgb_d"
+      resolution: [1920, 1080]
+      fps: 30
+      connection:
+        type: "usb"
+        device: "/dev/video0"
+    
+    - camera_id: "left_wrist_camera"
+      driver_id: "left_wrist_camera_driver"
+      type: "rgb"
+      resolution: [640, 480]
+      fps: 30
+      connection:
+        type: "usb"
+        device: "/dev/video1"
+    
+    - camera_id: "right_wrist_camera"
+      driver_id: "right_wrist_camera_driver"
+      type: "rgb"
+      resolution: [640, 480]
+      fps: 30
+      connection:
+        type: "usb"
+        device: "/dev/video2"
+
+  # 激光雷达配置
+  lidars:
+    - lidar_id: "base_lidar"
+      driver_id: "base_lidar_driver"
+      type: "2d_lidar"
+      range_max: 30.0  # m
+      angle_min: -3.14159
+      angle_max: 3.14159
+      connection:
+        type: "ethernet"
+        address: "192.168.1.200"
+        port: 2368
+
+# WBC控制器配置
+wbc:
+  controller_id: "dual_arm_wbc"
+  control_frequency: 1000.0  # Hz
+  
+  # 机器人模型参数
+  robot_model:
+    urdf_file: "config/robot_description.urdf"
+    base_link: "base_link"
+    left_end_effector: "left_end_effector"
+    right_end_effector: "right_end_effector"
+  
+  # 控制参数
+  control_params:
+    position_gains:
+      kp: [1000, 1000, 800, 500, 500, 300, 300]  # 每个关节的比例增益
+      kd: [50, 50, 40, 25, 25, 15, 15]           # 每个关节的微分增益
+    
+    impedance_params:
+      stiffness: [500, 500, 500, 100, 100, 100]  # 任务空间刚度 [x,y,z,rx,ry,rz]
+      damping: [50, 50, 50, 10, 10, 10]          # 任务空间阻尼
+  
+  # 约束配置
+  constraints:
+    joint_limits: true
+    collision_avoidance: true
+    singularity_avoidance: true
+    workspace_limits:
+      x_min: -1.0
+      x_max: 1.0
+      y_min: -1.0
+      y_max: 1.0
+      z_min: 0.0
+      z_max: 2.0
+
+# Gateway网关配置
+gateway:
+  gateway_id: "robot_gateway"
+  
+  # MQTT配置
+  mqtt:
+    broker_host: "192.168.1.10"
+    broker_port: 1883
+    client_id: "dual_arm_robot"
+    username: "robot_user"
+    password: "robot_pass"
+    topics:
+      state: "robot/state"
+      order: "robot/order"
+      connection: "robot/connection"
+      dual_arm_state: "robot/dual_arm_state"
+      manipulation_order: "robot/manipulation_order"
+  
+  # HTTP REST API配置
+  rest_api:
+    host: "0.0.0.0"
+    port: 8000
+    endpoints:
+      - path: "/api/v1/status"
+        method: "GET"
+      - path: "/api/v1/order"
+        method: "POST"
+      - path: "/api/v1/control"
+        method: "POST"
+  
+  # WebSocket配置
+  websocket:
+    host: "0.0.0.0"
+    port: 8001
+    topics:
+      - "robot_state"
+      - "sensor_data"
+      - "alerts"
+
+# 任务行为配置
+task_behavior:
+  planner_id: "task_planner"
+  
+  # 任务模板配置
+  task_templates:
+    pick_and_place:
+      actions: ["approach", "pick", "lift", "move", "place", "retreat"]
+      coordination_mode: "independent"
+    
+    dual_arm_handover:
+      actions: ["approach_both", "grasp_source", "handover", "release_target"]
+      coordination_mode: "cooperative"
+    
+    assembly:
+      actions: ["pick_part1", "pick_part2", "align", "insert", "release"]
+      coordination_mode: "coordinated"
+  
+  # 动作参数
+  action_params:
+    approach_distance: 0.1    # m
+    retreat_distance: 0.1     # m
+    lift_height: 0.05         # m
+    grasp_force: 50.0         # N
+    position_tolerance: 0.001 # m
+    orientation_tolerance: 0.01 # rad
+
+# 工具配置
+tools:
+  # 监控工具
+  monitoring:
+    tool_id: "system_monitor"
+    monitoring_interval: 1.0  # s
+    metrics:
+      - name: "joint_temperatures"
+        threshold_warning: 60.0
+        threshold_critical: 80.0
+      - name: "joint_currents"
+        threshold_warning: 80.0
+        threshold_critical: 95.0
+      - name: "battery_level"
+        threshold_warning: 20.0
+        threshold_critical: 10.0
+      - name: "cpu_usage"
+        threshold_warning: 80.0
+        threshold_critical: 95.0
+      - name: "memory_usage"
+        threshold_warning: 80.0
+        threshold_critical: 95.0
+  
+  # 诊断工具
+  diagnostics:
+    tool_id: "system_diagnostics"
+    tests:
+      - name: "joint_health_check"
+        interval: 300  # s
+      - name: "sensor_calibration_check"
+        interval: 3600  # s
+      - name: "communication_test"
+        interval: 60   # s
+  
+  # 校准工具
+  calibration:
+    tool_id: "system_calibration"
+    procedures:
+      - name: "joint_calibration"
+        auto_schedule: false
+      - name: "camera_calibration"
+        auto_schedule: true
+        interval: 86400  # 24小时
+      - name: "force_sensor_calibration"
+        auto_schedule: true
+        interval: 604800  # 7天
+  
+  # 维护工具
+  maintenance:
+    tool_id: "maintenance_manager"
+    schedules:
+      preventive:
+        - component: "left_arm"
+          interval: 2592000  # 30天
+          tasks: ["lubrication", "wear_check", "calibration"]
+        - component: "right_arm"
+          interval: 2592000  # 30天
+          tasks: ["lubrication", "wear_check", "calibration"]
+        - component: "chassis"
+          interval: 604800   # 7天
+          tasks: ["wheel_check", "battery_check"]
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  handlers:
+    - type: "file"
+      filename: "logs/robot.log"
+      max_bytes: 10485760  # 10MB
+      backup_count: 5
+    - type: "console"
+      level: "INFO"
+  
+  # 组件特定日志级别
+  loggers:
+    "drivers": "DEBUG"
+    "wbc": "INFO"
+    "gateway": "INFO"
+    "task_behavior": "INFO"
+    "tools": "WARNING"
+
+# 安全配置
+safety:
+  emergency_stop:
+    enabled: true
+    gpio_pin: 18
+  
+  collision_detection:
+    enabled: true
+    sensitivity: 0.5
+  
+  workspace_monitoring:
+    enabled: true
+    zones:
+      - name: "safe_zone"
+        bounds: [[-0.8, 0.8], [-0.8, 0.8], [0.0, 1.8]]
+      - name: "restricted_zone"
+        bounds: [[-0.2, 0.2], [-0.2, 0.2], [0.0, 0.5]]
+  
+  force_limits:
+    max_contact_force: 50.0  # N
+    max_joint_torque: 100.0  # Nm
+
+# 性能配置
+performance:
+  max_acceleration: 2.0      # m/s²
+  max_jerk: 10.0            # m/s³
+  trajectory_smoothing: true
+  path_optimization: true
+  
+  # 资源限制
+  max_cpu_usage: 80.0       # %
+  max_memory_usage: 80.0    # %
+  max_network_bandwidth: 100 # Mbps
