@@ -43,7 +43,7 @@ export const useAuth = () => {
       setToken(response.token)
       return true
     } catch (err) {
-      const message = err instanceof Error ? err.message : '????????'
+      const message = err instanceof Error ? err.message : '\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF'
       setError(message)
       return false
     } finally {

@@ -32,7 +32,7 @@ export const useLogs = (token: string | null) => {
       setItems(logs)
     } catch (err) {
       setItems([])
-      const message = err instanceof Error ? err.message : '????????'
+      const message = err instanceof Error ? err.message : '\u65E0\u6CD5\u83B7\u53D6\u65E5\u5FD7\u5217\u8868'
       setError(message)
     } finally {
       setLoading(false)
@@ -56,7 +56,7 @@ export const useLogs = (token: string | null) => {
         const blob = await downloadLog(token, log.name)
         triggerBrowserDownload(blob, log.name)
       } catch (err) {
-        const message = err instanceof Error ? err.message : '??????'
+        const message = err instanceof Error ? err.message : '\u65E5\u5FD7\u4E0B\u8F7D\u5931\u8D25'
         setError(message)
       }
     },
