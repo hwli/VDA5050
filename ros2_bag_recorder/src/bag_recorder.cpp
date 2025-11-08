@@ -35,6 +35,8 @@ public:
     this->declare_parameter<std::vector<std::string>>("excluded_topics", std::vector<std::string>());
     this->declare_parameter<std::string>("compression_mode", "none");  // none, file, message
     this->declare_parameter<std::string>("compression_format", "");   // zstd, lz4
+    this->declare_parameter<int>("compression_threads", 0);  // 0 means auto-detect CPU cores
+    this->declare_parameter<int>("compression_queue_size", 1);  // Queue size for compression
     this->declare_parameter<uint64_t>("max_bag_size", 0);  // 0 means unlimited (in MB)
     this->declare_parameter<uint64_t>("max_bag_duration", 0);  // 0 means unlimited (in seconds)
     this->declare_parameter<uint64_t>("max_cache_size", 0);  // 0 means use default
@@ -49,6 +51,8 @@ public:
     std::vector<std::string> excluded_topics = this->get_parameter("excluded_topics").as_string_array();
     std::string compression_mode = this->get_parameter("compression_mode").as_string();
     std::string compression_format = this->get_parameter("compression_format").as_string();
+    int compression_threads = this->get_parameter("compression_threads").as_int();
+    int compression_queue_size = this->get_parameter("compression_queue_size").as_int();
     uint64_t max_bag_size = this->get_parameter("max_bag_size").as_uint();
     uint64_t max_bag_duration = this->get_parameter("max_bag_duration").as_uint();
     uint64_t max_cache_size = this->get_parameter("max_cache_size").as_uint();
@@ -85,8 +89,19 @@ public:
       if (!compression_format.empty()) {
         record_options.compression_format = compression_format;
       }
-      RCLCPP_INFO(this->get_logger(), "Compression: mode=%s, format=%s", 
-                  compression_mode.c_str(), compression_format.c_str());
+      record_options.compression_threads = static_cast<size_t>(compression_threads);
+      record_options.compression_queue_size = static_cast<size_t>(compression_queue_size);
+      
+      if (compression_threads == 0) {
+        RCLCPP_INFO(this->get_logger(), 
+                    "Compression: mode=%s, format=%s, threads=auto, queue_size=%zu", 
+                    compression_mode.c_str(), compression_format.c_str(), compression_queue_size);
+      } else {
+        RCLCPP_INFO(this->get_logger(), 
+                    "Compression: mode=%s, format=%s, threads=%zu, queue_size=%zu", 
+                    compression_mode.c_str(), compression_format.c_str(), 
+                    compression_threads, compression_queue_size);
+      }
     }
 
     // Duration limit

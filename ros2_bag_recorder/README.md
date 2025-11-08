@@ -48,15 +48,28 @@ ros2 run ros2_bag_recorder bag_recorder \
   -p excluded_topics:="['/rosout', '/parameter_events']"
 ```
 
-### 4. 启用压缩
+### 4. 启用压缩（多线程）
 
 ```bash
+# 自动线程数（推荐）
 ros2 run ros2_bag_recorder bag_recorder \
   --ros-args \
   -p bag_path:=my_recording \
   -p topics:="['/camera/image']" \
-  -p compression_mode:=file \
-  -p compression_format:=zstd
+  -p compression_mode:=message \
+  -p compression_format:=zstd \
+  -p compression_threads:=0 \
+  -p compression_queue_size:=10
+
+# 手动指定8个压缩线程
+ros2 run ros2_bag_recorder bag_recorder \
+  --ros-args \
+  -p bag_path:=my_recording \
+  -p topics:="['/camera/image']" \
+  -p compression_mode:=message \
+  -p compression_format:=zstd \
+  -p compression_threads:=8 \
+  -p compression_queue_size:=20
 ```
 
 ### 5. 设置最大文件大小和时长
@@ -82,6 +95,8 @@ ros2 run ros2_bag_recorder bag_recorder \
 | `excluded_topics` | string[] | [] | 排除的话题列表 |
 | `compression_mode` | string | "none" | 压缩模式：none/file/message |
 | `compression_format` | string | "" | 压缩格式：zstd/lz4 |
+| `compression_threads` | int | 0 | 压缩线程数（0=自动检测CPU核心数） |
+| `compression_queue_size` | int | 1 | 压缩队列大小 |
 | `max_bag_size` | uint64 | 0 | 最大文件大小（MB，0=无限制） |
 | `max_bag_duration` | uint64 | 0 | 最大录制时长（秒，0=无限制） |
 | `max_cache_size` | uint64 | 0 | 最大缓存大小（MB，0=使用默认值） |
