@@ -8,6 +8,7 @@ endif()
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosbag2_transport REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
 find_package(rosbag2_storage REQUIRED)
 find_package(rosbag2_storage_default_plugins REQUIRED)
@@ -16,6 +17,7 @@ find_package(rosbag2_storage_default_plugins REQUIRED)
 add_executable(bag_recorder src/bag_recorder.cpp)
 ament_target_dependencies(bag_recorder
   rclcpp
+  rosbag2_transport
   rosbag2_cpp
   rosbag2_storage
   rosbag2_storage_default_plugins
